@@ -1,0 +1,51 @@
+menu "KAIGO Hub Configuration"
+
+    config KAIGO_WIFI_SSID
+        string "Wi-Fi SSID"
+        default ""
+        help
+            Network the hub joins (for example the caregiver PC's mobile hotspot).
+
+    config KAIGO_WIFI_PASSWORD
+        string "Wi-Fi password"
+        default ""
+        help
+            WPA2 passphrase. It is stored only in sdkconfig, which is git-ignored.
+
+    config KAIGO_SERVER_BASE_URL
+        string "Caregiver server base URL"
+        default "http://192.168.137.1:5000"
+        help
+            Base URL of the caregiver web server, without a trailing slash.
+            192.168.137.1 is the host address of a Windows mobile hotspot.
+
+    config KAIGO_NTP_SERVER
+        string "NTP server"
+        default "pool.ntp.org"
+        help
+            Time server for the real-time clock. Needs internet through the hotspot.
+            Without internet the hub adopts the KAIGO server's clock instead.
+
+    config KAIGO_TIMEZONE
+        string "Timezone (POSIX TZ string)"
+        default "CST6"
+        help
+            Local timezone for logs. "CST6" is Monterrey / Mexico City (UTC-6,
+            no daylight saving since 2022).
+
+    config KAIGO_WIFI_MAX_TX_POWER_DBM
+        int "Maximum Wi-Fi transmit power (dBm)"
+        range 2 20
+        default 15
+        help
+            Lower power means smaller current spikes on the 3.3 V rail, which
+            helps if the display flickers when Wi-Fi transmits. 20 is the chip maximum.
+
+    config KAIGO_LCD_ILI9488_TUNING
+        bool "Send ILI9488 power / VCOM / gamma / frame-rate init"
+        default y
+        help
+            Standard ILI9488 panel tuning. Turn off only if your panel is not an
+            ILI9488 and the picture looks wrong with it enabled.
+
+endmenu

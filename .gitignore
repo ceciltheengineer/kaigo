@@ -1,0 +1,29 @@
+# --- Secrets and personal data (never commit) ---
+backend/config.local.json
+*.db
+*.db-journal
+*.sqlite
+.env
+
+# --- Python ---
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# --- Firmware build output (firmware/KAIGO/.gitignore also ignores sdkconfig,
+#     which holds the Wi-Fi password) ---
+firmware/KAIGO/build/
+firmware/KAIGO/managed_components/
+sdkconfig
+sdkconfig.old
+
+# --- Old frontend snapshot kept locally ---
+frontend/_backup_v3.5/
+
+# --- Editors / OS ---
+~$*
+*.tmp
+.DS_Store
+Thumbs.db
+Desktop.ini

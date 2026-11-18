@@ -1,0 +1,9 @@
+# Project defaults, applied when sdkconfig is (re)generated.
+# Wi-Fi credentials are deliberately NOT here: set them with `idf.py menuconfig`
+# (KAIGO Hub Configuration) so they only ever live in the git-ignored sdkconfig.
+CONFIG_KAIGO_SERVER_BASE_URL="http://192.168.137.1:5000"
+
+# Board: ESP32-S3 module with 16 MB flash (N16), flashed over the UART bridge.
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"

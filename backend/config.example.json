@@ -1,0 +1,13 @@
+{
+  "_comment": "Copy this file to config.local.json (git-ignored) and fill in your CallMeBot details. Keys under 'callmebot' are caregiver usernames; 'default' is used for anyone without their own entry.",
+  "callmebot": {
+    "cecil": {
+      "phone": "5210000000000",
+      "apikey": "0000000"
+    },
+    "default": {
+      "phone": "5210000000000",
+      "apikey": "0000000"
+    }
+  }
+}

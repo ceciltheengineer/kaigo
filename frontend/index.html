@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>kaigo Caregiver</title>
+  <link rel="stylesheet" href="css/style.css?v=4.0">
+</head>
+<body>
+
+  <!-- ============================================================
+       SIGN IN
+       ============================================================ -->
+  <div id="login-overlay" class="login-overlay" role="dialog" aria-labelledby="login-title">
+    <div class="login-main">
+      <div class="login-top">
+        <span class="brand">k<span class="brand-ai">ai</span>go</span>
+        <span class="corner-label">Caregiver portal</span>
+      </div>
+
+      <div class="login-body">
+        <h1 class="login-title" id="login-title">Sign in</h1>
+        <p class="login-lead">Choose your account to see how your loved one is doing.</p>
+
+        <div id="login-error" class="form-error hidden" role="alert"></div>
+
+        <div class="account-list" id="login-quick-users" role="listbox" aria-label="Accounts">
+          <p class="text-muted">Loading accounts</p>
+        </div>
+
+        <form id="login-form" class="login-form" novalidate>
+          <div class="form-group hidden" id="login-username-group">
+            <label for="login-username">Username</label>
+            <input type="text" id="login-username" class="input" placeholder="cecil" autocomplete="username">
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" class="input" placeholder="Password" autocomplete="current-password">
+          </div>
+          <div class="login-row">
+            <label class="check-row">
+              <input type="checkbox" id="login-remember" checked>
+              <span>Keep me signed in</span>
+            </label>
+            <button type="button" class="link-btn" id="btn-login-other">Use a different username</button>
+          </div>
+          <button type="submit" id="login-submit-btn" class="btn btn-primary btn-large">Sign in</button>
+        </form>
+      </div>
+
+      <div class="login-foot">
+        <span>Demo accounts use password 1234</span>
+        <button type="button" class="link-btn" id="btn-open-manage-users">Manage accounts</button>
+      </div>
+    </div>
+    <aside class="login-panel" aria-hidden="true">
+      <span class="shape-disc"></span>
+      <span class="shape-arch"><i></i><i></i></span>
+    </aside>
+  </div>
+
+  <!-- ============================================================
+       MANAGE ACCOUNTS
+       ============================================================ -->
+  <div id="manage-users-modal" class="modal-overlay hidden" role="dialog" aria-labelledby="manage-users-title">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 id="manage-users-title">Accounts</h3>
+        <button type="button" class="link-btn" id="btn-close-manage-users" aria-label="Close">Close</button>
+      </div>
+      <p class="modal-lead">Cecil and Diego are built-in demo accounts and can't be deleted.</p>
+      <div class="user-mgmt-list" id="manage-users-list"></div>
+
+      <h4 class="modal-sub">New account</h4>
+      <div class="form-row">
+        <div class="form-group form-half">
+          <label for="new-user-fullname">Full name</label>
+          <input type="text" id="new-user-fullname" class="input" placeholder="Anna Ruiz" autocomplete="off">
+        </div>
+        <div class="form-group form-half">
+          <label for="new-user-username">Username</label>
+          <input type="text" id="new-user-username" class="input" placeholder="anna" autocomplete="off">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group form-half">
+          <label for="new-user-password">Password</label>
+          <input type="password" id="new-user-password" class="input" value="1234">
+        </div>
+        <div class="form-group form-half">
+          <label for="new-user-role">Role</label>
+          <select id="new-user-role" class="input">
+            <option value="Caregiver">Family caregiver</option>
+            <option value="Nurse / Staff">Nurse / staff</option>
+            <option value="Physician">Physician</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="btn-done-manage-users">Done</button>
+        <button type="button" class="btn btn-primary" id="btn-create-user">Create account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       GEMINI KEY
+       ============================================================ -->
+  <div id="gemini-modal" class="modal-overlay hidden" role="dialog" aria-labelledby="gemini-modal-title">
+    <div class="modal-card modal-sm">
+      <div class="modal-head"><h3 id="gemini-modal-title">AI key</h3></div>
+      <p class="modal-lead">Add a Google Gemini key for written summaries. Without one, Kaigo uses its built-in rules.</p>
+      <div class="form-group">
+        <label for="gemini-key-input">Gemini API key</label>
+        <input type="password" id="gemini-key-input" class="input" placeholder="AIzaSy..." autocomplete="off">
+        <div class="input-meta">Free key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio</a>.</div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="btn-cancel-gemini">Cancel</button>
+        <button type="button" class="btn btn-primary" id="btn-save-gemini">Save key</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       LOVED ONE PROFILE (edit later)
+       ============================================================ -->
+  <div id="patient-modal" class="modal-overlay hidden" role="dialog" aria-labelledby="patient-modal-title">
+    <div class="modal-card">
+      <div class="modal-head"><h3 id="patient-modal-title">Loved one</h3></div>
+      <div class="form-group">
+        <label for="patient-name-input">Name</label>
+        <input type="text" id="patient-name-input" class="input" placeholder="Maria Gonzalez">
+      </div>
+      <div class="form-row">
+        <div class="form-group form-half">
+          <label for="patient-age-input">Age</label>
+          <input type="number" id="patient-age-input" class="input" placeholder="72" min="40" max="120">
+        </div>
+        <div class="form-group form-half">
+          <label for="patient-relation-input">Relationship</label>
+          <select id="patient-relation-input" class="input">
+            <option value="Mother">Mother</option>
+            <option value="Father">Father</option>
+            <option value="Grandmother">Grandmother</option>
+            <option value="Grandfather">Grandfather</option>
+            <option value="Spouse">Spouse</option>
+            <option value="Relative">Relative</option>
+            <option value="Nurse / Caregiver">Patient (I'm a nurse)</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="patient-condition-input">Health notes</label>
+        <textarea id="patient-condition-input" class="input" rows="3" placeholder="Lives alone, takes blood pressure meds in the morning, uses a walker."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="btn-cancel-patient">Cancel</button>
+        <button type="button" class="btn btn-primary" id="btn-save-patient">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       ONBOARDING (first sign-in)
+       ============================================================ -->
+  <div id="onboarding-fullscreen" class="onb-screen hidden" role="dialog" aria-modal="true" aria-labelledby="onb-title">
+    <header class="onb-header">
+      <span class="brand">k<span class="brand-ai">ai</span>go</span>
+      <div class="onb-progress" id="onb-progress-dots" aria-label="Setup progress">
+        <span class="onb-dot" data-step="1"></span>
+        <span class="onb-dot" data-step="2"></span>
+        <span class="onb-dot" data-step="3"></span>
+      </div>
+      <span class="corner-label" id="onb-step-indicator">Welcome</span>
+    </header>
+
+    <div class="onb-body">
+      <div class="onb-kaigo">
+        <div class="device" id="onb-device-interactive" title="Tap Kaigo">
+          <div class="companion-tft-screen">
+            <div class="tft-header-bar">
+              <span class="tft-hub-title">KAIGO HUB</span>
+              <span class="tft-status-pill online">ONLINE</span>
+            </div>
+            <div class="tft-face-canvas face-online face-sparkle" id="onb-tft-face">
+              <div class="tft-eyebrow brow-l"></div>
+              <div class="tft-eyebrow brow-r"></div>
+              <div class="tft-eye eye-l"><div class="tft-iris-shine"></div><div class="tft-sparkle-main"></div><div class="tft-sparkle-sub"></div></div>
+              <div class="tft-eye eye-r"><div class="tft-iris-shine"></div><div class="tft-sparkle-main"></div><div class="tft-sparkle-sub"></div></div>
+              <div class="tft-cheek cheek-l"></div>
+              <div class="tft-cheek cheek-r"></div>
+              <div class="tft-mouth mouth-cat"></div>
+            </div>
+          </div>
+        </div>
+        <div class="onb-speech">
+          <span class="onb-speaker" id="onb-speaker-name">Kaigo</span>
+          <p class="onb-speech-text" id="onb-speech-text">Hi, I'm Kaigo.</p>
+          <p class="onb-speech-sub" id="onb-speech-subtext">I sit by their bed, ask simple questions, and tell you if something's wrong.</p>
+        </div>
+      </div>
+
+      <div class="onb-deck">
+        <!-- 0: Welcome -->
+        <section class="onb-step" id="onb-step-0">
+          <h1 class="onb-title" id="onb-title">Let's set up Kaigo</h1>
+          <p class="onb-lead">Three quick questions. About a minute.</p>
+          <ol class="onb-outline">
+            <li><span>01</span>Who you're caring for</li>
+            <li><span>02</span>Age and relationship</li>
+            <li><span>03</span>What Kaigo should watch for</li>
+          </ol>
+          <div class="onb-actions">
+            <button type="button" class="btn btn-primary" id="btn-onb-start">Start</button>
+            <button type="button" class="link-btn" id="btn-onb-skip">Skip for now</button>
+          </div>
+        </section>
+
+        <!-- 1: Name -->
+        <section class="onb-step hidden" id="onb-step-1">
+          <span class="onb-count">1 of 3</span>
+          <h2 class="onb-title">Who are you caring for?</h2>
+          <p class="onb-lead">Their first name or what they like to be called.</p>
+          <div class="form-group">
+            <label for="onb-name-input" class="sr-only">Name</label>
+            <input type="text" id="onb-name-input" class="input input-xl" placeholder="Maria" autocomplete="off" data-enter="btn-onb-next-1">
+          </div>
+          <div class="onb-actions">
+            <button type="button" class="btn btn-ghost" id="btn-onb-back-1">Back</button>
+            <button type="button" class="btn btn-primary" id="btn-onb-next-1">Next</button>
+          </div>
+        </section>
+
+        <!-- 2: Age & relationship -->
+        <section class="onb-step hidden" id="onb-step-2">
+          <span class="onb-count">2 of 3</span>
+          <h2 class="onb-title" id="onb-step2-title">Age and relationship</h2>
+          <p class="onb-lead">Helps Kaigo judge what's normal for them.</p>
+          <div class="form-group">
+            <label for="onb-age-input">Age</label>
+            <input type="number" id="onb-age-input" class="input input-xl input-age" placeholder="72" min="40" max="120" data-enter="btn-onb-next-2">
+          </div>
+          <div class="form-group">
+            <span class="field-label">They are my</span>
+            <div class="chip-grid" id="onb-relation-chips">
+              <button type="button" class="onb-rel-chip chip active" data-rel="Mother">Mother</button>
+              <button type="button" class="onb-rel-chip chip" data-rel="Father">Father</button>
+              <button type="button" class="onb-rel-chip chip" data-rel="Grandmother">Grandmother</button>
+              <button type="button" class="onb-rel-chip chip" data-rel="Grandfather">Grandfather</button>
+              <button type="button" class="onb-rel-chip chip" data-rel="Spouse">Spouse</button>
+              <button type="button" class="onb-rel-chip chip" data-rel="Relative">Relative</button>
+              <button type="button" class="onb-rel-chip chip" data-rel="Nurse / Caregiver">Patient</button>
+              <button type="button" class="onb-rel-chip chip" data-rel="Other">Other</button>
+            </div>
+            <input type="hidden" id="onb-relation-val" value="Mother">
+          </div>
+          <div class="onb-actions">
+            <button type="button" class="btn btn-ghost" id="btn-onb-back-2">Back</button>
+            <button type="button" class="btn btn-primary" id="btn-onb-next-2">Next</button>
+          </div>
+        </section>
+
+        <!-- 3: Health focus -->
+        <section class="onb-step hidden" id="onb-step-3">
+          <span class="onb-count">3 of 3</span>
+          <h2 class="onb-title" id="onb-step3-title">What should Kaigo watch for?</h2>
+          <p class="onb-lead">Pick any that apply. You can change this later.</p>
+          <div class="chip-grid" id="onb-health-tags">
+            <button type="button" class="onb-tag-chip chip" data-tag="Lives alone at home">Lives alone</button>
+            <button type="button" class="onb-tag-chip chip" data-tag="Takes morning medication">Daily medication</button>
+            <button type="button" class="onb-tag-chip chip" data-tag="Joint or back stiffness">Joint or back pain</button>
+            <button type="button" class="onb-tag-chip chip" data-tag="Needs fall prevention and mobility monitoring">Fall risk</button>
+            <button type="button" class="onb-tag-chip chip" data-tag="Restless sleep and nighttime wakings">Poor sleep</button>
+          </div>
+          <div class="form-group">
+            <label for="onb-condition-input">Anything else (optional)</label>
+            <textarea id="onb-condition-input" class="input" rows="2" placeholder="Blood pressure pills at 8 AM, uses a walker."></textarea>
+          </div>
+          <div class="onb-actions">
+            <button type="button" class="btn btn-ghost" id="btn-onb-back-3">Back</button>
+            <button type="button" class="btn btn-primary" id="btn-onb-save-profile">Finish setup</button>
+          </div>
+        </section>
+
+        <!-- 4: Done -->
+        <section class="onb-step hidden" id="onb-step-4">
+          <h2 class="onb-title" id="onb-done-title">You're all set</h2>
+          <p class="onb-lead" id="onb-done-lead">Kaigo will start checking in. You'll see answers on your dashboard as they come in.</p>
+          <div class="onb-actions">
+            <button type="button" class="btn btn-primary" id="btn-onb-finish">Go to dashboard</button>
+            <button type="button" class="link-btn" id="btn-onb-tour">Show me around</button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       DASHBOARD TOUR
+       ============================================================ -->
+  <div id="dashboard-spotlight-tour" class="tour-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="tour-callout-title">
+    <div class="tour-backdrop" id="tour-spotlight-backdrop"></div>
+    <div id="tour-spotlight-frame" class="tour-frame"></div>
+    <div id="tour-callout-card" class="tour-card">
+      <div class="tour-head">
+        <span class="corner-label" id="tour-callout-badge"></span>
+        <button type="button" class="link-btn" id="btn-skip-guided-tour">Close</button>
+      </div>
+      <h3 class="tour-title" id="tour-callout-title">Kaigo</h3>
+      <p class="tour-body" id="tour-callout-body"></p>
+      <p class="tour-hint" id="tour-interactive-hint"></p>
+      <div class="tour-foot">
+        <div class="tour-dots" id="tour-spot-dots">
+        </div>
+        <div class="tour-btns">
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-tour-spot-prev" disabled>Back</button>
+          <button type="button" class="btn btn-primary btn-sm" id="btn-tour-spot-next">Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOS -->
+  <div id="sos-overlay" class="sos-overlay hidden" role="alertdialog" aria-modal="true" aria-labelledby="sos-title">
+    <div class="sos-shape" aria-hidden="true"></div>
+    <div class="sos-content">
+      <p class="sos-label">Emergency</p>
+      <h1 class="sos-title" id="sos-title">SOS Pressed</h1>
+      <p class="sos-subtitle">The emergency button on the Kaigo hub was pressed.</p>
+      <p class="sos-timestamp" id="sos-timestamp"></p>
+      <p class="sos-count" id="sos-count"></p>
+      <button class="sos-ack-btn" id="sos-ack-btn">I'm on it</button>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- ============================================================
+       SIDEBAR
+       ============================================================ -->
+  <nav class="sidebar" id="sidebar" aria-label="Main">
+    <div class="sidebar-header">
+      <span class="brand brand-lg">k<span class="brand-ai">ai</span>go</span>
+      <div class="connection-status">
+        <span class="status-dot disconnected" id="status-dot"></span>
+        <span class="status-label" id="status-label">Connecting</span>
+      </div>
+    </div>
+
+    <div class="nav-list" role="tablist">
+      <button class="nav-item active" role="tab" data-tab="tab-inicio"><span class="nav-num">01</span><span class="nav-label">Today</span></button>
+      <button class="nav-item" role="tab" data-tab="tab-enviar"><span class="nav-num">02</span><span class="nav-label">Ask</span></button>
+      <button class="nav-item" role="tab" data-tab="tab-programar"><span class="nav-num">03</span><span class="nav-label">Schedule</span></button>
+      <button class="nav-item" role="tab" data-tab="tab-historial"><span class="nav-num">04</span><span class="nav-label">History</span></button>
+      <button class="nav-item" role="tab" data-tab="tab-tendencias"><span class="nav-num">05</span><span class="nav-label">Insights</span></button>
+    </div>
+
+    <details class="sidebar-settings">
+      <summary>Settings</summary>
+      <div class="settings-body">
+        <button class="link-btn" id="btn-sidebar-patient">Loved one profile</button>
+        <button class="link-btn" id="btn-open-gemini-modal">AI key</button>
+        <button class="link-btn" id="btn-sidebar-tour">Dashboard tour</button>
+        <label class="switch-row">
+          <span>Read questions aloud</span>
+          <span class="toggle"><input type="checkbox" id="speech-checkbox" checked><span class="toggle-slider"></span></span>
+        </label>
+        <button class="link-btn" id="test-voice-btn">Test speaker</button>
+        <button class="link-btn link-danger" id="btn-sidebar-reset-slate">Reset demo data</button>
+      </div>
+    </details>
+
+    <div class="sidebar-user">
+      <span class="user-avatar" id="user-avatar-initial">C</span>
+      <span class="user-name" id="user-display-name">Caregiver</span>
+      <button class="link-btn" id="btn-sign-out">Sign out</button>
+    </div>
+
+    <div class="sidebar-shape" aria-hidden="true"><span class="arch-left"></span><span class="arch-right"></span></div>
+  </nav>
+
+  <div class="offline-banner hidden" id="offline-banner">
+    Can't reach the Kaigo server. Check that <code>server.py</code> is running on port 5000. Retrying.
+  </div>
+
+  <main class="main-content" id="main-content">
+
+    <!-- ============================================================
+         TODAY
+         ============================================================ -->
+    <section class="tab-panel active" id="tab-inicio" role="tabpanel">
+      <header class="page-head">
+        <div>
+          <h2 class="section-title" id="welcome-greeting">Good morning</h2>
+          <p class="patient-line">
+            <span id="patient-banner-name">Monitoring</span>
+            <span class="patient-desc" id="patient-banner-desc"></span>
+            <button class="link-btn" id="btn-edit-patient">Edit</button>
+          </p>
+        </div>
+        <div class="hub-status-badge online" id="hub-status-badge">
+          <span class="status-dot"></span><span id="hub-status-text">Hub connected</span>
+        </div>
+      </header>
+
+      <!-- Status: Kaigo face + AI summary -->
+      <div class="status-row">
+        <div class="companion-hub-box" id="companion-hub-box" title="Tap to preview Kaigo's moods">
+          <div class="companion-device-frame device">
+            <div class="companion-tft-screen">
+              <div class="tft-header-bar">
+                <span class="tft-hub-title">KAIGO HUB</span>
+                <span class="tft-status-pill online" id="tft-status-pill">ONLINE</span>
+              </div>
+              <div class="tft-face-canvas face-online" id="companion-face">
+                <div class="tft-eyebrow brow-l"></div>
+                <div class="tft-eyebrow brow-r"></div>
+                <div class="tft-eye eye-l"><div class="tft-iris-shine"></div><div class="tft-sparkle-main"></div><div class="tft-sparkle-sub"></div></div>
+                <div class="tft-eye eye-r"><div class="tft-iris-shine"></div><div class="tft-sparkle-main"></div><div class="tft-sparkle-sub"></div></div>
+                <div class="tft-cheek cheek-l"></div>
+                <div class="tft-cheek cheek-r"></div>
+                <div class="tft-mouth mouth-cat" id="tft-mouth"></div>
+              </div>
+            </div>
+          </div>
+          <div class="dependee-status-badge status-thriving" id="dependee-status-badge">
+            <span class="dependee-status-icon" id="dependee-status-icon" aria-hidden="true"></span>
+            <span class="dependee-status-text" id="dependee-status-text">Kaigo is active</span>
+          </div>
+          <div class="dependee-status-sub" id="dependee-status-sub"></div>
+        </div>
+
+        <div class="ai-copilot-card">
+          <div class="ai-head">
+            <span class="corner-label">Kaigo's summary</span>
+            <span class="ai-meta"><span id="companion-scope-badge">Last month</span> · <span id="ai-model-source">Rules</span></span>
+          </div>
+          <p class="ai-summary-text" id="ai-summary-text">Looking at recent answers…</p>
+          <div class="ai-lists">
+            <div>
+              <h4 class="ai-col-title">Needs attention</h4>
+              <ul class="ai-list ai-list-risk" id="ai-risk-list"><li>Nothing flagged.</li></ul>
+            </div>
+            <div>
+              <h4 class="ai-col-title">Suggested next steps</h4>
+              <ul class="ai-list" id="ai-action-list"><li>Keep scheduled check-ins on.</li></ul>
+            </div>
+          </div>
+          <div class="ai-foot">
+            <button class="link-btn" id="btn-refresh-ai">Refresh</button>
+            <button class="link-btn" id="btn-go-to-insights">See charts</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Metrics -->
+      <div class="wellness-hero-grid">
+        <div class="wellness-hero-card">
+          <div class="wellness-hero-val" id="home-val-wellness">--</div>
+          <div class="wellness-hero-label">Wellness score</div>
+          <span class="wellness-hero-chip" id="home-chip-wellness"></span>
+          <div class="wellness-hero-basis" id="home-basis-wellness"></div>
+        </div>
+        <div class="wellness-hero-card">
+          <div class="wellness-hero-val" id="home-val-meds">--</div>
+          <div class="wellness-hero-label">Medication taken</div>
+          <span class="wellness-hero-chip" id="home-chip-meds"></span>
+        </div>
+        <div class="wellness-hero-card">
+          <div class="wellness-hero-val" id="home-val-pain">--</div>
+          <div class="wellness-hero-label">Latest pain</div>
+          <span class="wellness-hero-chip" id="home-chip-pain"></span>
+        </div>
+        <div class="wellness-hero-card">
+          <div class="wellness-hero-val" id="home-val-sos">0</div>
+          <div class="wellness-hero-label">SOS alerts</div>
+          <span class="wellness-hero-chip" id="home-chip-sos"></span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card" id="card-quick-checkin">
+          <h3 class="card-title">Quick check-in</h3>
+          <p class="card-hint">Sends right away and reads it aloud on the hub.</p>
+          <div class="quick-list">
+            <button class="btn-quick-check" data-text="Did you take your medication?" data-type="boolean"><span>Did you take your medication?</span><span class="preset-type">Yes / No</span></button>
+            <button class="btn-quick-check" data-text="How is your pain level right now?" data-type="range"><span>How is your pain right now?</span><span class="preset-type">1 to 10</span></button>
+            <button class="btn-quick-check" data-text="How are you feeling today?" data-type="range"><span>How are you feeling today?</span><span class="preset-type">1 to 10</span></button>
+            <button class="btn-quick-check" data-text="Do you need any help?" data-type="boolean"><span>Do you need any help?</span><span class="preset-type">Yes / No</span></button>
+          </div>
+        </div>
+        <div class="card">
+          <h3 class="card-title">Recent answers</h3>
+          <div id="home-recent-feed" class="feed"><p class="text-muted">Loading</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         ASK
+         ============================================================ -->
+    <section class="tab-panel" id="tab-enviar" role="tabpanel">
+      <header class="page-head">
+        <h2 class="section-title">Ask</h2>
+        <p class="page-label">Send a question to the hub</p>
+      </header>
+
+      <div class="status-panel" id="current-question-card">
+        <div id="current-question-content"><p class="text-muted">No question on the hub right now.</p></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 class="card-title">New question</h3>
+          <div class="form-group">
+            <label for="question-input">Question</label>
+            <input type="text" id="question-input" class="input" placeholder="Did you drink water this morning?" autocomplete="off" maxlength="80">
+            <div class="input-meta"><span id="char-count">0</span>/80. Short questions fit the hub screen better. Ctrl+Enter sends.</div>
+          </div>
+          <div class="form-group">
+            <span class="field-label">Answer with</span>
+            <div class="segmented" role="radiogroup">
+              <label class="seg-option"><input type="radio" name="question-type" value="boolean" checked><span>Yes / No buttons</span></label>
+              <label class="seg-option"><input type="radio" name="question-type" value="range"><span>Dial 1 to 10</span></label>
+            </div>
+            <div id="range-scale-guide" class="scale-guide hidden">
+              <span class="field-label">What does 10 mean?</span>
+              <div class="segmented segmented-sm">
+                <label class="seg-option"><input type="radio" name="scale-polarity" value="worse_high" checked><span>10 is worst (pain)</span></label>
+                <label class="seg-option"><input type="radio" name="scale-polarity" value="better_high"><span>10 is best (mood, sleep)</span></label>
+              </div>
+              <p class="input-meta" id="scale-guide-desc">1 = no pain, 10 = unbearable.</p>
+              <div id="scale-visual-bar" class="scale-visual-bar"></div>
+              <div class="scale-ticks"><span id="tick-min">1: None</span><span id="tick-max">10: Unbearable</span></div>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-large" id="send-question-btn">Send to Hub</button>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title" id="presets-card-title">Presets</h3>
+          <p class="card-hint">Fills the form. Review, then send.</p>
+          <div class="preset-list">
+            <button class="preset-btn" data-text="Did you take your morning medication?" data-type="boolean"><span>Did you take your morning medication?</span><span class="preset-type">Yes / No</span></button>
+            <button class="preset-btn" data-text="How is your back pain this morning?" data-type="range" data-polarity="worse_high"><span>How is your back pain this morning?</span><span class="preset-type">10 = worst</span></button>
+            <button class="preset-btn" data-text="Did you get up and stretch your back today?" data-type="boolean"><span>Did you stretch your back today?</span><span class="preset-type">Yes / No</span></button>
+            <button class="preset-btn" data-text="How was your mood and energy today?" data-type="range" data-polarity="better_high"><span>How was your mood and energy today?</span><span class="preset-type">10 = best</span></button>
+            <button class="preset-btn" data-text="How well did you sleep last night?" data-type="range" data-polarity="better_high"><span>How well did you sleep last night?</span><span class="preset-type">10 = best</span></button>
+            <button class="preset-btn" data-text="Do you need any help right now?" data-type="boolean"><span>Do you need any help right now?</span><span class="preset-type">Yes / No</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SCHEDULE
+         ============================================================ -->
+    <section class="tab-panel" id="tab-programar" role="tabpanel">
+      <header class="page-head">
+        <h2 class="section-title">Schedule</h2>
+        <p class="page-label" id="schedule-page-label">Recurring check-ins</p>
+      </header>
+
+      <div class="grid-2 grid-2-wide">
+        <div class="card">
+          <h3 class="card-title">New check-in</h3>
+          <div class="form-group">
+            <label for="schedule-question">Question</label>
+            <input type="text" id="schedule-question" class="input" placeholder="Did you take your morning pills?" autocomplete="off" maxlength="80">
+          </div>
+          <div class="form-row">
+            <div class="form-group form-half">
+              <label for="schedule-type">Answer with</label>
+              <select id="schedule-type" class="input">
+                <option value="boolean">Yes / No</option>
+                <option value="range">Dial 1 to 10</option>
+              </select>
+            </div>
+            <div class="form-group form-half">
+              <label for="schedule-time">Time</label>
+              <input type="time" id="schedule-time" class="input" value="08:00">
+            </div>
+          </div>
+          <div class="form-group" id="sched-polarity-wrap" style="display:none;">
+            <label for="schedule-polarity">What does 10 mean?</label>
+            <select id="schedule-polarity" class="input">
+              <option value="worse_high">10 is worst (pain, symptoms)</option>
+              <option value="better_high">10 is best (mood, sleep, energy)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <span class="field-label">Days</span>
+            <div class="day-selector">
+              <label class="day-checkbox"><input type="checkbox" class="day-cb" value="mon"><span>M</span></label>
+              <label class="day-checkbox"><input type="checkbox" class="day-cb" value="tue"><span>T</span></label>
+              <label class="day-checkbox"><input type="checkbox" class="day-cb" value="wed"><span>W</span></label>
+              <label class="day-checkbox"><input type="checkbox" class="day-cb" value="thu"><span>T</span></label>
+              <label class="day-checkbox"><input type="checkbox" class="day-cb" value="fri"><span>F</span></label>
+              <label class="day-checkbox"><input type="checkbox" class="day-cb" value="sat"><span>S</span></label>
+              <label class="day-checkbox"><input type="checkbox" class="day-cb" value="sun"><span>S</span></label>
+            </div>
+            <div class="day-shortcuts">
+              <button type="button" class="link-btn" data-days="all">Every day</button>
+              <button type="button" class="link-btn" data-days="weekdays">Weekdays</button>
+              <button type="button" class="link-btn" data-days="none">Clear</button>
+            </div>
+          </div>
+          <button class="btn btn-primary" id="add-schedule-btn">Add check-in</button>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Upcoming</h3>
+          <div id="schedule-list" class="schedule-list"><p class="empty">No check-ins yet.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         HISTORY
+         ============================================================ -->
+    <section class="tab-panel" id="tab-historial" role="tabpanel">
+      <header class="page-head">
+        <h2 class="section-title">History</h2>
+        <p class="page-label">Every answer and alert</p>
+      </header>
+      <div class="card">
+        <div class="toolbar">
+          <input type="search" id="history-search" class="input input-search" placeholder="Search questions">
+          <div class="filter-group" role="group" aria-label="Filter">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="boolean">Yes / No</button>
+            <button class="filter-btn" data-filter="range">Scale</button>
+            <button class="filter-btn" data-filter="sos">SOS</button>
+          </div>
+          <button id="btn-clear-history" class="link-btn link-danger">Clear all</button>
+        </div>
+        <div class="table-wrapper">
+          <table class="table">
+            <thead><tr><th>When</th><th>Question</th><th>Answer</th><th class="col-action"><span class="sr-only">Delete</span></th></tr></thead>
+            <tbody id="history-tbody"><tr class="empty-row"><td colspan="4">Loading</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         INSIGHTS
+         ============================================================ -->
+    <section class="tab-panel" id="tab-tendencias" role="tabpanel">
+      <header class="page-head">
+        <h2 class="section-title">Insights</h2>
+        <div class="filter-group" id="insights-scope-pills" role="group" aria-label="Time range">
+          <button class="filter-btn scope-pill" data-scope="1w">Week</button>
+          <button class="filter-btn scope-pill active" data-scope="1m">Month</button>
+          <button class="filter-btn scope-pill" data-scope="6m">6 months</button>
+          <button class="filter-btn scope-pill" data-scope="1y">Year</button>
+        </div>
+      </header>
+
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value" id="stat-wellness-score">--</div><div class="stat-label">Wellness score</div></div>
+        <div class="stat-card"><div class="stat-value" id="stat-med-compliance">--</div><div class="stat-label">Medication taken</div></div>
+        <div class="stat-card"><div class="stat-value" id="stat-avg-pain">--</div><div class="stat-label">Avg. pain, 7 days (10 = worst)</div></div>
+        <div class="stat-card"><div class="stat-value" id="stat-avg-mood">--</div><div class="stat-label">Avg. mood, 7 days (10 = best)</div></div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="card chart-card chart-wide">
+          <h3 class="card-title">Pain</h3>
+          <p class="card-hint">10 is worst. Mild 1 to 3, moderate 4 to 6, severe 7 to 10.</p>
+          <div class="chart-container"><canvas id="chart-pain-trend"></canvas></div>
+          <p class="chart-empty hidden" id="pain-empty">No pain answers yet.</p>
+        </div>
+        <div class="card chart-card chart-wide">
+          <h3 class="card-title">Mood and energy</h3>
+          <p class="card-hint">10 is best.</p>
+          <div class="chart-container"><canvas id="chart-mood-trend"></canvas></div>
+          <p class="chart-empty hidden" id="mood-empty">No mood answers yet.</p>
+        </div>
+        <div class="card chart-card">
+          <h3 class="card-title" id="chart-meds-title">Medication</h3>
+          <div class="chart-container"><canvas id="chart-meds"></canvas></div>
+          <p class="chart-empty hidden" id="meds-empty">No medication answers yet.</p>
+        </div>
+        <div class="card chart-card">
+          <h3 class="card-title">Daily activity</h3>
+          <div class="chart-container"><canvas id="chart-daily"></canvas></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+  <script src="js/app.js?v=4.0"></script>
+</body>
+</html>
